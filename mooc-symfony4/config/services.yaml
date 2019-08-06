@@ -1,0 +1,57 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
+parameters:
+    locale: fr
+
+services:
+
+
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        public: true        # Access it directly from the container object, which is accessible from any controller that extends Controller 
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/*'
+        exclude: '../src/{DependencyInjection,Entity,Migrations,Tests,Kernel.php}'
+
+    # controllers are imported separately to make sure services can be injected
+    # as action arguments even if you don't extend any base controller class
+    App\Controller\:
+        resource: '../src/Controller'
+        tags: ['controller.service_arguments']
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+
+    # explicitly configure the service
+
+    App\Services\Antispam\OCAntispam:
+        arguments:
+            $mailer: "@mailer"
+            $locale: '%locale%'
+            $minLength: 50
+
+    oc_platform.email.application_mailer:
+        class: App\Services\Email\ApplicationMailer
+        arguments:
+            $mailer: "@mailer"        
+        
+    App\Services\DoctrineListener\ApplicationCreationListener:
+        arguments:
+            $applicationMailer: "@oc_platform.email.application_mailer"
+        tags:
+            - { name: 'doctrine.event_listener', event: 'postPersist' }    
+
+    oc_advert.validator.antiflood:                              # Le nom du service
+        class: App\Validator\Constraints\AntifloodValidator     # La classe du service, ici notre validateur déjà créé
+        arguments: ["@request_stack", "@doctrine.orm.entity_manager"] # Les données qu'on injecte au service : la requête et l'EntityManager
+        tags:
+            - { name: validator.constraint_validator, alias: oc_advert_antiflood }  # C'est avec l'alias qu'on retrouvera le service   
+   

@@ -1,0 +1,12 @@
+# config/routes.yaml
+
+login:
+    path: /advert/login
+    defaults:
+        _controller: App\Controller\SecurityController::loginAction
+
+login_check:
+    path: /advert/login_check
+
+logout:
+    path: /advert/logout

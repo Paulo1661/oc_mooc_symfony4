@@ -1,0 +1,23 @@
+{# templates/Advert/add.html.twig #}
+
+{% extends "Advert/layout.html.twig" %}
+
+{% block body %}
+
+  <h2>Ajouter une annonce</h2>
+
+  {{ include("Advert/_form.html.twig") }}
+
+  <p>
+    Attention : cette annonce sera ajoutée directement
+    sur la page d'accueil après validation du formulaire.
+  </p>
+
+  <p>
+    <a href="{{ path('oc_advert_index') }}" class="btn btn-default">
+      <i class="glyphicon glyphicon-chevron-left"></i>
+      Retour aux annonces
+    </a>
+  </p>
+
+{% endblock %}
